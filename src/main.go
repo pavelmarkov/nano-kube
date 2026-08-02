@@ -6,6 +6,8 @@ import (
 )
 
 func main() {
-	t := task.CreateTask("Test Task")
+	t := task.CreateTask("TestTask")
 	fmt.Printf("task: %v\n", t)
+
+	task.RunTask(t)
 }
