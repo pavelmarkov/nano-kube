@@ -26,8 +26,7 @@ type DockerClient struct {
 	resp   *container.CreateResponse
 }
 
-func GetDockerClient(
-	dc *DockerClient,
+func (dc *DockerClient) GetDockerClient(
 	ctx *context.Context,
 	config *ContainerConfig,
 ) (*client.Client, error) {
@@ -62,7 +61,7 @@ func GetDockerClient(
 	return cli, nil
 }
 
-func PullDockerImage(dc *DockerClient) (err error) {
+func (dc *DockerClient) PullDockerImage() (err error) {
 	log.Printf("📥 Pulling image: %s...\n", dc.config.ImageName)
 	reader, err := dc.cli.ImagePull(dc.ctx, dc.config.ImageName, image.PullOptions{})
 	if err != nil {
@@ -73,7 +72,7 @@ func PullDockerImage(dc *DockerClient) (err error) {
 	return nil
 }
 
-func CreateDockerContainer(dc *DockerClient) (*container.CreateResponse, error) {
+func (dc *DockerClient) CreateDockerContainer() (*container.CreateResponse, error) {
 	resp, err := dc.cli.ContainerCreate(
 		dc.ctx,
 		&container.Config{
@@ -101,7 +100,7 @@ func CreateDockerContainer(dc *DockerClient) (*container.CreateResponse, error) 
 	return &resp, nil
 }
 
-func StartDockerContainer(dc *DockerClient) (err error) {
+func (dc *DockerClient) StartDockerContainer() (err error) {
 	err = dc.cli.ContainerStart(dc.ctx, dc.resp.ID, container.StartOptions{})
 	if err != nil {
 		return err
@@ -109,7 +108,7 @@ func StartDockerContainer(dc *DockerClient) (err error) {
 	return nil
 }
 
-func AttachDockerStdout(dc *DockerClient) (err error) {
+func (dc *DockerClient) AttachDockerStdout() (err error) {
 
 	// Attach to the container's streams for interactive session
 	attachResp, err := dc.cli.ContainerAttach(dc.ctx, dc.resp.ID, container.AttachOptions{

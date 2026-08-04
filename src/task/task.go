@@ -50,32 +50,32 @@ func RunTask(t *Task) error {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancelFunc()
 
-	cli, err := dockerclient.GetDockerClient(DockerClient, &ctx, &ContainerConfig)
+	cli, err := DockerClient.GetDockerClient(&ctx, &ContainerConfig)
 	if err != nil {
 		log.Fatalf("Failed to get docker client: %v", err)
 		return err
 	}
 	defer cli.Close()
 
-	err = dockerclient.PullDockerImage(DockerClient)
+	err = DockerClient.PullDockerImage()
 	if err != nil {
 		slog.Error("Failed to pull image", "error", err)
 		return err
 	}
 
-	_, err = dockerclient.CreateDockerContainer(DockerClient)
+	_, err = DockerClient.CreateDockerContainer()
 	if err != nil {
 		log.Fatalf("Failed to create container: %v", err)
 		return err
 	}
 
-	err = dockerclient.StartDockerContainer(DockerClient)
+	err = DockerClient.StartDockerContainer()
 	if err != nil {
 		log.Fatalf("Failed to start container: %v", err)
 		return err
 	}
 
-	err = dockerclient.AttachDockerStdout(DockerClient)
+	err = DockerClient.AttachDockerStdout()
 	if err != nil {
 		log.Fatalf("Failed to attach: %v", err)
 		return err
