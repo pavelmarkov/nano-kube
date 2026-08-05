@@ -12,6 +12,7 @@ import (
 )
 
 type TaskState int
+type TaskIdentifier = uuid.UUID
 
 const (
 	Pending TaskState = iota
@@ -22,7 +23,7 @@ const (
 )
 
 type Task struct {
-	TaskId uuid.UUID
+	TaskId TaskIdentifier
 	Name   string
 	State  TaskState
 }
@@ -85,8 +86,7 @@ func RunTask(t *Task) error {
 }
 
 // Stringer interfaces
-
-func (t Task) String() string {
+func (t *Task) String() string {
 	return fmt.Sprintf("%s (%s)", t.Name, t.State)
 }
 func (s TaskState) String() string {
