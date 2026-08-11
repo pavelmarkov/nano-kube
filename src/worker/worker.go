@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"main/task"
+	"time"
 
 	"github.com/golang-collections/collections/queue"
 )
@@ -30,13 +31,27 @@ func (w *Worker) AddTask(t *task.Task) {
 }
 
 func (w *Worker) RunTasks() {
-	t := w.TaskQueue.Dequeue()
-	if t == nil {
-		log.Println("Queue is empty")
-		return
+	for {
+		t := w.TaskQueue.Dequeue()
+		if t == nil {
+			log.Println("Queue is empty")
+		} else {
+			firstTaskInQueue := t.(*task.Task)
+			err := task.RunTask(firstTaskInQueue)
+			if err != nil {
+				log.Printf("Failed running task: %v", err)
+				w.TaskStorage[firstTaskInQueue.TaskId].State = task.Failed
+			} else {
+				w.TaskStorage[firstTaskInQueue.TaskId].State = task.Running
+			}
+		}
+		log.Println("Sleep for 10 seconds")
+		time.Sleep(10 * time.Second)
 	}
-	firstTaskInQueue := t.(*task.Task)
-	task.RunTask(firstTaskInQueue)
+}
+
+func (w *Worker) GetTasks() map[task.TaskIdentifier]*task.Task {
+	return w.TaskStorage
 }
 
 // Stringer interfaces

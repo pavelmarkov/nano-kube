@@ -8,6 +8,8 @@ import (
 	"main/dockerclient"
 	"time"
 
+	"encoding/json"
+
 	"github.com/google/uuid"
 )
 
@@ -43,9 +45,9 @@ func RunTask(t *Task) error {
 	DockerClient := &dockerclient.DockerClient{}
 
 	ContainerConfig := dockerclient.ContainerConfig{
-		ImageName:     "alpine",
+		ImageName:     "strm/helloworld-http",
 		ContainerName: t.Name,
-		Commands:      []string{"sh"},
+		Commands:      []string{},
 	}
 
 	ctx, cancelFunc := context.WithTimeout(context.Background(), 30*time.Second)
@@ -53,7 +55,7 @@ func RunTask(t *Task) error {
 
 	cli, err := DockerClient.GetDockerClient(&ctx, &ContainerConfig)
 	if err != nil {
-		log.Fatalf("Failed to get docker client: %v", err)
+		log.Printf("Failed to get docker client: %v", err)
 		return err
 	}
 	defer cli.Close()
@@ -66,21 +68,21 @@ func RunTask(t *Task) error {
 
 	_, err = DockerClient.CreateDockerContainer()
 	if err != nil {
-		log.Fatalf("Failed to create container: %v", err)
+		log.Printf("Failed to create container: %v", err)
 		return err
 	}
 
 	err = DockerClient.StartDockerContainer()
 	if err != nil {
-		log.Fatalf("Failed to start container: %v", err)
+		log.Printf("Failed to start container: %v", err)
 		return err
 	}
 
-	err = DockerClient.AttachDockerStdout()
-	if err != nil {
-		log.Fatalf("Failed to attach: %v", err)
-		return err
-	}
+	// err = DockerClient.AttachDockerStdout()
+	// if err != nil {
+	// 	log.Printf("Failed to attach: %v", err)
+	// 	return err
+	// }
 
 	return nil
 }
@@ -91,4 +93,23 @@ func (t *Task) String() string {
 }
 func (s TaskState) String() string {
 	return []string{"Pending", "Scheduled", "Running", "Completed", "Failed"}[s]
+}
+
+func (s TaskState) MarshalJSON() ([]byte, error) {
+	var taskState string
+	switch s {
+	case Pending:
+		taskState = "Pending"
+	case Scheduled:
+		taskState = "Scheduled"
+	case Running:
+		taskState = "Running"
+	case Completed:
+		taskState = "Completed"
+	case Failed:
+		taskState = "Failed"
+	default:
+		taskState = "Unknown"
+	}
+	return json.Marshal(taskState)
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"main/task"
+	"main/api"
 	"main/worker"
 )
 
@@ -10,10 +10,9 @@ func main() {
 	w := worker.CreateWorker("TestWorker")
 	fmt.Printf("worker: %v\n", w)
 
-	t := task.CreateTask("TestTask")
-	fmt.Printf("task: %v\n", t)
+	go w.RunTasks()
 
-	w.AddTask(t)
-
-	w.RunTasks()
+	a := api.Api{Worker: w}
+	a.Init()
+	a.Router.Run()
 }
