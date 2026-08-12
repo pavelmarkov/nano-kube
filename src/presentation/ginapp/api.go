@@ -1,17 +1,15 @@
-package api
+package ginapp
 
 import (
-	"fmt"
-	"main/task"
-	"main/worker"
+	"main/domain/interfaces"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Api struct {
-	Worker *worker.Worker
-	Router *gin.Engine
+	WorkerApp interfaces.WorkerApp
+	Router    *gin.Engine
 }
 
 func (a *Api) Init() {
@@ -25,15 +23,12 @@ func (a *Api) Init() {
 }
 
 func (a *Api) GetTasks(c *gin.Context) {
-	tasks := a.Worker.GetTasks()
+	tasks := a.WorkerApp.GetTasks()
 	c.JSON(http.StatusOK, gin.H{"method": "GET", "tasks": tasks})
 }
 
 func (a *Api) StartTask(c *gin.Context) {
-	t := task.CreateTask("TestTask")
-	fmt.Printf("task: %v\n", t)
-
-	a.Worker.AddTask(t)
+	a.WorkerApp.StartTask()
 	c.JSON(http.StatusOK, gin.H{"method": "POST", "message": "Task added"})
 }
 

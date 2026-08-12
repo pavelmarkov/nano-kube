@@ -2,17 +2,31 @@ package main
 
 import (
 	"fmt"
-	"main/api"
-	"main/worker"
+	"main/application"
+	"main/presentation/ginapp"
+	"main/services"
 )
 
 func main() {
-	w := worker.CreateWorker("TestWorker")
+	ts := services.TaskService{}
+
+	ws := services.WorkerService{
+		TaskService: &ts,
+	}
+
+	w := ws.CreateWorker("TestWorker")
 	fmt.Printf("worker: %v\n", w)
+	go ws.RunTasks(w)
 
-	go w.RunTasks()
+	wa := application.WorkerApp{
+		Worker:        w,
+		WorkerService: &ws,
+		TaskService:   &ts,
+	}
 
-	a := api.Api{Worker: w}
+	a := ginapp.Api{
+		WorkerApp: &wa,
+	}
 	a.Init()
 	a.Router.Run()
 }
